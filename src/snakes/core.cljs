@@ -16,7 +16,7 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {
-                      :title "Snakes"
+                      :title "Snakes cljs"
                       :curr-dir default-direction
                       :snakes initial-snakes}))
 
