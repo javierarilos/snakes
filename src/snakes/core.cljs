@@ -55,17 +55,28 @@
   [snakes]
   (vec (map mv-snake snakes)))
 
+(defn not-contrary-dir
+  [dir]
+  (case dir
+    :left [:up :down]
+    :right [:up :down]
+    :up [:left :right]
+    :down [:left :right]))
+
 (defn rand-dir
   [dir]
-  (if (< (rand) 0.75)
+  (if (< (rand) 0.7)
     dir
-    (rand-nth [:left :right :up :down])))
+    (rand-nth (not-contrary-dir dir))))
 
 (defn change-snake-dir
   [snake]
-  (case (:owner snake)
-    :player (assoc snake :dir (:curr-dir @app-state))
-    (assoc snake :dir (rand-dir (:dir snake)))))
+  (let [
+    owner (:owner snake)
+    curr-dir (:dir snake)]
+    (case owner
+      :player (assoc snake :dir (:curr-dir @app-state))
+      (assoc snake :dir (rand-dir curr-dir)))))
 
 (defn change-snakes-dirs
   [snakes]
