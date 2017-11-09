@@ -17,7 +17,7 @@
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {
                       :title "Snakes"
-                      :curr-key default-direction
+                      :curr-dir default-direction
                       :snakes initial-snakes}))
 
 (defn position-valid?
@@ -34,7 +34,7 @@
     :left   [-1 0]
     ))
 
-(defn mv-snake
+(defn mv-player-snake
   [snake]
   (let [positions (:pos snake)
         direction (:dir snake)
@@ -47,13 +47,33 @@
           (assoc snake :pos newpositions)
           snake)))
 
+(defn mv-snake
+  [snake]
+  (mv-player-snake snake))
+
 (defn mv-snakes
   [snakes]
   (vec (map mv-snake snakes)))
 
+(defn rand-dir
+  [dir]
+  (if (< (rand) 0.75)
+    dir
+    (rand-nth [:left :right :up :down])))
+
+(defn change-snake-dir
+  [snake]
+  (case (:owner snake)
+    :player (assoc snake :dir (:curr-dir @app-state))
+    (assoc snake :dir (rand-dir (:dir snake)))))
+
+(defn change-snakes-dirs
+  [snakes]
+  (vec (map change-snake-dir snakes)))
+
 (defn update-game []
   (let
-    [updated-snakes (mv-snakes (:snakes @app-state))]
+    [updated-snakes (mv-snakes (change-snakes-dirs (:snakes @app-state)))]
     (prn "... update-game")
     (prn "snakes: " (:snakes @app-state))
     (prn "snakes updated " updated-snakes)
@@ -97,7 +117,8 @@
 
 (defn update-user-direction
   [direction]
-  (swap! app-state assoc-in [:snakes 0 :dir] direction))
+  (swap! app-state assoc :curr-dir direction)
+  (prn ">>>>>>>>>>>>>>>>>>>>> " @app-state))
 
 (defn handle-keydown [e]
    (when-let
